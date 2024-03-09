@@ -29,7 +29,7 @@ use prost::Message;
 
 use crate::cast::{CastFrom, TryCastFrom};
 #[cfg(target_os = "linux")]
-use crate::linux::{Mapping, MAPPINGS};
+use crate::linux::MAPPINGS;
 use crate::StringTable;
 
 /// A single sample in the profile. The stack is a list of addresses.
@@ -52,7 +52,7 @@ pub struct Mapping {
 
 /// Build ID of a shared object.
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct BuildId(Vec<u8>);
+pub struct BuildId(pub Vec<u8>);
 
 impl fmt::Display for BuildId {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
