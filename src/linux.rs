@@ -29,7 +29,7 @@ use libc::{c_void, dl_iterate_phdr, dl_phdr_info, size_t, Elf64_Word, PT_LOAD, P
 use once_cell::sync::Lazy;
 use tracing::error;
 
-use crate::cast::CastFrom;
+use crate::{cast::CastFrom, internal::{BuildId, Mapping}};
 
 /// Mappings of the processes' executable and shared libraries.
 #[cfg(target_os = "linux")]
