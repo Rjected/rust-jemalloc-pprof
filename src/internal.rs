@@ -64,7 +64,7 @@ impl fmt::Display for BuildId {
 }
 
 /// A minimal representation of a profile that can be parsed from the jemalloc heap profile.
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct StackProfile {
     pub annotations: Vec<String>,
     // The second element is the index in `annotations`, if one exists.
