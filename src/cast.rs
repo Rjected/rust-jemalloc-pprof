@@ -115,6 +115,7 @@ pub mod target64 {
     cast_from!(u64, usize);
     cast_from!(i64, isize);
 }
+
 #[cfg(target_pointer_width = "64")]
 pub use target64::*;
 

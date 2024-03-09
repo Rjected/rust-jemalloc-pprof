@@ -17,7 +17,9 @@
 //! code used internally by the higher-level convenience functions.
 
 use std::collections::BTreeMap;
+use std::fmt;
 use std::io::{BufRead, Write};
+use std::path::PathBuf;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use anyhow::bail;
@@ -26,6 +28,7 @@ use flate2::Compression;
 use prost::Message;
 
 use crate::cast::{CastFrom, TryCastFrom};
+#[cfg(target_os = "linux")]
 use crate::linux::{Mapping, MAPPINGS};
 use crate::StringTable;
 
@@ -34,6 +37,30 @@ use crate::StringTable;
 pub struct WeightedStack {
     pub addrs: Vec<usize>,
     pub weight: f64,
+}
+
+/// A mapping of a single shared object.
+#[derive(Clone, Debug)]
+pub struct Mapping {
+    pub memory_start: usize,
+    pub memory_end: usize,
+    pub memory_offset: usize,
+    pub file_offset: u64,
+    pub pathname: PathBuf,
+    pub build_id: Option<BuildId>,
+}
+
+/// Build ID of a shared object.
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub struct BuildId(Vec<u8>);
+
+impl fmt::Display for BuildId {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        for byte in &self.0 {
+            write!(f, "{byte:02x}")?;
+        }
+        Ok(())
+    }
 }
 
 /// A minimal representation of a profile that can be parsed from the jemalloc heap profile.
@@ -301,6 +328,7 @@ pub fn parse_jeheap<R: BufRead>(r: R) -> anyhow::Result<StackProfile> {
         bail!("Stack without corresponding weight!");
     }
 
+    #[cfg(target_os = "linux")]
     if let Some(mappings) = MAPPINGS.as_ref() {
         for mapping in mappings {
             profile.push_mapping(mapping.clone());

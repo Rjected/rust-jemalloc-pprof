@@ -12,6 +12,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+#![cfg(target_os = "linux")]
 
 //! Linux-specific process introspection.
 
@@ -29,17 +30,6 @@ use once_cell::sync::Lazy;
 use tracing::error;
 
 use crate::cast::CastFrom;
-
-/// A mapping of a single shared object.
-#[derive(Clone, Debug)]
-pub struct Mapping {
-    pub memory_start: usize,
-    pub memory_end: usize,
-    pub memory_offset: usize,
-    pub file_offset: u64,
-    pub pathname: PathBuf,
-    pub build_id: Option<BuildId>,
-}
 
 /// Mappings of the processes' executable and shared libraries.
 #[cfg(target_os = "linux")]
@@ -93,19 +83,6 @@ pub struct SharedObject {
     pub build_id: Option<BuildId>,
     /// Loaded segments of the object.
     pub loaded_segments: Vec<LoadedSegment>,
-}
-
-/// Build ID of a shared object.
-#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct BuildId(Vec<u8>);
-
-impl fmt::Display for BuildId {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        for byte in &self.0 {
-            write!(f, "{byte:02x}")?;
-        }
-        Ok(())
-    }
 }
 
 /// A segment of a shared object that's loaded into memory.
