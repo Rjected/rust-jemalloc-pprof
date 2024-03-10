@@ -34,7 +34,7 @@ use tokio::sync::Mutex;
 pub mod internal;
 
 mod linux;
-mod macos;
+// mod macos;
 
 mod cast;
 
