@@ -18,6 +18,7 @@
 
 use std::collections::BTreeMap;
 use std::fmt;
+use std::fmt::Write as OtherWrite;
 use std::io::{BufRead, Write};
 use std::path::PathBuf;
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -44,7 +45,18 @@ impl fmt::Debug for WeightedStack {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("WeightedStack")
             // debug without borrowing
-            .field("addrs", &format_args!("{:x?}", &self.addrs))
+            .field(
+                "addrs",
+                &self
+                    .addrs
+                    .iter()
+                    .map(|x| {
+                        let mut s = String::new();
+                        write!(&mut s, "0x{:x}", x).unwrap();
+                        s
+                    })
+                    .collect::<Vec<_>>(),
+            )
             .field("weight", &self.weight)
             .finish()
     }
