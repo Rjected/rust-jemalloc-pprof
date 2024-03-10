@@ -1,31 +1,17 @@
-// Copyright Materialize, Inc. and contributors. All rights reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License in the LICENSE file at the
-// root of this repository, or online at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+//! MacOS-specific process introspection.
 #![cfg(target_os = "linux")]
-
-//! Linux-specific process introspection.
 
 //! Utility crate to extract information about the running process.
 //!
-//! Currently only works on Linux.
+//! Currently only works on MacOS.
 use std::ffi::{c_int, CStr, OsStr};
 use std::fmt;
 use std::os::unix::ffi::OsStrExt;
 use std::path::PathBuf;
 
 use anyhow::Context;
-use libc::{c_void, dl_iterate_phdr, dl_phdr_info, size_t, Elf64_Word, PT_LOAD, PT_NOTE};
+// use libc::{c_void, dl_iterate_phdr, dl_phdr_info, size_t, Elf64_Word, PT_LOAD, PT_NOTE};
+use libc::{c_void, size_t};
 use once_cell::sync::Lazy;
 use tracing::error;
 

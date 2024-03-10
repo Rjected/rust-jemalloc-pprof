@@ -40,7 +40,7 @@ pub struct WeightedStack {
 }
 
 /// A mapping of a single shared object.
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub struct Mapping {
     pub memory_start: usize,
     pub memory_end: usize,
@@ -48,6 +48,20 @@ pub struct Mapping {
     pub file_offset: u64,
     pub pathname: PathBuf,
     pub build_id: Option<BuildId>,
+}
+
+// impl dbeug where things are printed as hex
+impl fmt::Debug for Mapping {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Mapping")
+            .field("memory_start", &format_args!("{:x}", self.memory_start))
+            .field("memory_end", &format_args!("{:x}", self.memory_end))
+            .field("memory_offset", &format_args!("{:x}", self.memory_offset))
+            .field("file_offset", &self.file_offset)
+            .field("pathname", &self.pathname)
+            .field("build_id", &self.build_id)
+            .finish()
+    }
 }
 
 /// Build ID of a shared object.
