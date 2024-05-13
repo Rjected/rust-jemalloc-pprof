@@ -99,6 +99,12 @@ pub struct SharedObject {
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct BuildId(Vec<u8>);
 
+impl From<Vec<u8>> for BuildId {
+    fn from(v: Vec<u8>) -> Self {
+        BuildId(v)
+    }
+}
+
 impl fmt::Display for BuildId {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for byte in &self.0 {

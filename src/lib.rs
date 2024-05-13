@@ -22,9 +22,9 @@ use std::os::unix::ffi::OsStrExt;
 use std::sync::Arc;
 use std::time::Instant;
 
+use libc::size_t;
 use once_cell::sync::Lazy;
 use pure::parse_jeheap;
-use libc::size_t;
 
 use tempfile::NamedTempFile;
 use tikv_jemalloc_ctl::raw;

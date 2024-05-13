@@ -14,3 +14,5 @@ num.workspace = true
 paste.workspace = true
 prost.workspace = true
 flate2.workspace = true
+rsprocmaps = { git = "https://github.com/Rjected/procmaps.rs", branch = "add-from-lines" }
+elf = "0.7"

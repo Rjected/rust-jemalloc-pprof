@@ -1,10 +1,16 @@
 use anyhow::bail;
 use cast::{CastFrom, TryCastFrom};
+use elf::endian::AnyEndian;
+use elf::note::Note;
+use elf::ElfBytes;
 use flate2::write::GzEncoder;
 use flate2::Compression;
+use linux::BuildId;
 use prost::Message;
+use rsprocmaps::Pathname;
 use std::collections::BTreeMap;
 use std::io::{BufRead, Write};
+use std::path::PathBuf;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::linux::{Mapping, MAPPINGS};
@@ -315,11 +321,68 @@ pub fn parse_jeheap<R: BufRead>(r: R) -> anyhow::Result<StackProfile> {
         bail!("Stack without corresponding weight!");
     }
 
-    if let Some(mappings) = MAPPINGS.as_ref() {
-        for mapping in mappings {
-            profile.push_mapping(mapping.clone());
-        }
+    // get the build id
+
+    // Parse the mappings from the file
+    let maps = rsprocmaps::from_lines(lines);
+    for map in maps {
+        let map = map?;
+        let pathname = match map.pathname {
+            Pathname::Path(path_str) => path_str,
+            other => panic!("Expected a path, got something else: {other:?}"),
+        };
+
+        let pathname: PathBuf = pathname.into();
+
+        let file_data = std::fs::read(pathname.clone()).expect("Could not read file.");
+        let slice = file_data.as_slice();
+        let file = ElfBytes::<AnyEndian>::minimal_parse(slice).expect("Open test1");
+
+        // get the build ID from the ELF note header
+        let gnu_hdr = file
+            .section_header_by_name(".note.gnu")
+            .expect("section table should be parseable")
+            .expect("file should have a .note.gnu section");
+
+        let notes: Vec<_> = file
+            .section_data_as_notes(&gnu_hdr)
+            .expect("Should be able to get note section data")
+            .collect();
+
+        let build_id = notes
+            .into_iter()
+            .filter_map(|note| match note {
+                Note::GnuBuildId(build_id) => Some(build_id),
+                _ => None,
+            })
+            .next()
+            .unwrap()
+            .0;
+
+        let mapping = Mapping {
+            memory_start: map
+                .address_range
+                .begin
+                .try_into()
+                .expect("address range begin u64 fits in usize"),
+            memory_end: map
+                .address_range
+                .end
+                .try_into()
+                .expect("address range end u64 fits in usize"),
+            file_offset: map.offset,
+            memory_offset: map.offset.try_into().expect("offset u64 fits in usize"),
+            pathname,
+            build_id: Some(BuildId::from(Vec::from(build_id))),
+        };
+        profile.push_mapping(mapping);
     }
+
+    // if let Some(mappings) = MAPPINGS.as_ref() {
+    //     for mapping in mappings {
+    //         profile.push_mapping(mapping.clone());
+    //     }
+    // }
 
     Ok(profile)
 }
