@@ -321,8 +321,6 @@ pub fn parse_jeheap<R: BufRead>(r: R) -> anyhow::Result<StackProfile> {
         bail!("Stack without corresponding weight!");
     }
 
-    // get the build id
-
     // Parse the mappings from the file
     let maps = rsprocmaps::from_lines(lines);
     for map in maps {
